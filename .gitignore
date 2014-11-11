@@ -1,0 +1,10 @@
+# User generated .gitignore
+bin
+logs
+mods
+resourcepacks
+saves
+.pmd
+.classpath
+options.txt
+usernamecache.json
