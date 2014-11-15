@@ -33,6 +33,8 @@ public class Bows {
         proxy.preinit();
         Items.init();
         BowHandler.init();
+        
+        // Temp Recipes
         ItemStack is = new ItemStack(Items.bow);
         NBTTagCompound tag = new NBTTagCompound();
         is.setTagCompound(tag);
@@ -42,7 +44,7 @@ public class Bows {
         tag.setString("bow", "iron");
         CraftingManager.getInstance().addShapelessRecipe(is.copy(), new Object[] { Block.getBlockFromName("cobblestone") });
         
-        
+        // Ore dictionary
         //OreDictionary.registerOre("string", ore);
     }
     

@@ -9,12 +9,14 @@ import net.minecraft.item.ItemBow;
 public class Items {
 
 	public static ItemSpecialBow bow;
+	public static ItemBowPart bowPart;
 	
 	public static void init() {
 		LogHelper.info("Loading items", Reference.MOD_NAME);
 		Items.bow = new ItemSpecialBow();
+		Items.bowPart = new ItemBowPart();
 		GameRegistry.registerItem(Items.bow, "HxCBow");
-		LogHelper.info("Bow ID: " + Item.getIdFromItem(Items.bow), Reference.MOD_NAME);
+		GameRegistry.registerItem(Items.bowPart, "HxCBowPart");
 	}
 	
 }

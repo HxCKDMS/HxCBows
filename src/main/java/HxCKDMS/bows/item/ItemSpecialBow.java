@@ -24,11 +24,6 @@ public class ItemSpecialBow extends ItemBow {
         super();
         this.setUnlocalizedName("HxCBow");
         this.setNoRepair();
-        
-    }
-    
-    private void populateIconMaps() {
-        
     }
     
     @SideOnly(Side.CLIENT)
