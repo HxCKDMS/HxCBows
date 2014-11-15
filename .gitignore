@@ -1,5 +1,6 @@
 # User generated .gitignore
 bin
+crash-reports
 logs
 mods
 resourcepacks
