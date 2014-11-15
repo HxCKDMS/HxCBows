@@ -29,6 +29,7 @@ public class Bowstring implements IBowPart {
 
     @Override
     public IIcon getItemIcon() {
-        return ((Item) Item.itemRegistry.getObject("string")).getIconFromDamage(0);
+        //return ((Item) Item.itemRegistry.getObject("string")).getIconFromDamage(0);
+        return this.icons[0];
     }
 }

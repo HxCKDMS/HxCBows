@@ -23,6 +23,7 @@ public class BowHandler {
         bows.put("wood", new Bow("wood", 75));
         bows.put("iron", new Bow("iron", 125).setDrawTime(6));
         bowstrings.put("normal", new Bowstring("normal", 25));
+        bowstrings.put("colorful", new Bowstring("colorful", 75));
         arrows.put("test", new Arrow("test"));
     }
     

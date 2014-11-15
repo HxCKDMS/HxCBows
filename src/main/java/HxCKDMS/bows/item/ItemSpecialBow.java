@@ -14,6 +14,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
+import HxCKDMS.bows.entity.EntityHxCArrow;
 import HxCKDMS.bows.lib.BowHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -68,7 +69,7 @@ public class ItemSpecialBow extends ItemBow {
             powerPerc = (powerPerc * powerPerc + powerPerc * 2.0F) / 3.0F;
             if ((double) powerPerc < 0.1D) return;
             if (powerPerc > 1.0F) powerPerc = 1.0F;
-            EntityArrow arrowEnt = new EntityArrow(worldObj, player, powerPerc * 2.0F);
+            EntityArrow arrowEnt = new EntityHxCArrow(worldObj, player, powerPerc * 2.0F, new ItemStack(Items.arrow, 1));
             if (powerPerc == 1.0F) arrowEnt.setIsCritical(true);
             
             int powerModifier = EnchantmentHelper.getEnchantmentLevel(Enchantment.power.effectId, stack);
