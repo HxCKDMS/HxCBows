@@ -9,6 +9,8 @@ import net.minecraft.util.IIcon;
 import HxCKDMS.bows.item.ItemSpecialBow;
 import HxCKDMS.bows.parts.Bow;
 import HxCKDMS.bows.parts.Bowstring;
+import HxCKDMS.bows.parts.BowstringColorful;
+import HxCKDMS.bows.parts.IBowPart;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -23,7 +25,7 @@ public class BowHandler {
         bows.put("wood", new Bow("wood", 75));
         bows.put("iron", new Bow("iron", 125).setDrawTime(6));
         bowstrings.put("normal", new Bowstring("normal", 25));
-        bowstrings.put("colorful", new Bowstring("colorful", 75));
+        bowstrings.put("colorful", new BowstringColorful("colorful", 75));
         arrows.put("test", new Arrow("test"));
     }
     
@@ -41,7 +43,7 @@ public class BowHandler {
         return bows.get("wood");
     }
     
-    public static Bowstring getString(ItemStack stack) {
+    public static Bowstring getBowstring(ItemStack stack) {
         if (!(stack.getItem() instanceof ItemSpecialBow)) return null;
         NBTTagCompound tag = stack.getTagCompound();
         if (tag != null && tag.hasKey("bowstring")) {
@@ -53,6 +55,10 @@ public class BowHandler {
     public static Arrow getArrow(ItemStack stack) {
         if (!(stack.getItem() instanceof ItemSpecialBow)) return null;
         return arrows.get("test");
+    }
+    
+    public static IBowPart[] getBowParts(ItemStack stack) {
+        return new IBowPart[] { getBow(stack), getBowstring(stack) };
     }
     
     @SideOnly(Side.CLIENT)

@@ -1,7 +1,9 @@
 package HxCKDMS.bows.parts;
 
+import HxCKDMS.bows.entity.EntityHxCArrow;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 
 public class Bowstring implements IBowPart {
@@ -31,5 +33,10 @@ public class Bowstring implements IBowPart {
     public IIcon getItemIcon() {
         //return ((Item) Item.itemRegistry.getObject("string")).getIconFromDamage(0);
         return this.icons[0];
+    }
+
+    @Override
+    public EntityHxCArrow applyArrowEffects(ItemStack stack, EntityHxCArrow arrow, float pullPerc) {
+        return arrow;
     }
 }

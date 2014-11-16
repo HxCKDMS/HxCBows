@@ -4,12 +4,12 @@ import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.oredict.OreDictionary;
 import HxCKDMS.bows.item.Items;
 import HxCKDMS.bows.lib.BowHandler;
 import HxCKDMS.bows.lib.Reference;
 import HxCKDMS.bows.proxy.CommonProxy;
+import cpw.mods.fml.client.FMLClientHandler;
+import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -30,7 +30,6 @@ public class Bows {
     
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-        proxy.preinit();
         Items.init();
         BowHandler.init();
         
@@ -46,6 +45,9 @@ public class Bows {
         
         // Ore dictionary
         //OreDictionary.registerOre("string", ore);
+        
+        
+        proxy.preinit();
     }
     
     @EventHandler

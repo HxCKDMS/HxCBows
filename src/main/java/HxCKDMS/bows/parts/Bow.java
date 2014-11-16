@@ -1,6 +1,10 @@
 package HxCKDMS.bows.parts;
 
+import HxCKDMS.bows.entity.EntityHxCArrow;
 import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 
 public class Bow implements IBowPart {
@@ -40,5 +44,16 @@ public class Bow implements IBowPart {
     
     public int getDrawTime() {
         return this.drawTime;
+    }
+
+    @Override
+    public EntityHxCArrow applyArrowEffects(ItemStack stack, EntityHxCArrow arrow, float pullPerc) {
+        if (pullPerc == 1.0F) arrow.setIsCritical(true);
+        int powerModifier = EnchantmentHelper.getEnchantmentLevel(Enchantment.power.effectId, stack);
+        if (powerModifier > 0) arrow.setDamage(arrow.getDamage() + (double) powerModifier * 0.5D + 0.5D);
+        int punchModifier = EnchantmentHelper.getEnchantmentLevel(Enchantment.punch.effectId, stack);
+        if (punchModifier > 0) arrow.setKnockbackStrength(punchModifier);
+        if (EnchantmentHelper.getEnchantmentLevel(Enchantment.flame.effectId, stack) > 0) arrow.setFire(100);
+        return arrow;
     }
 }

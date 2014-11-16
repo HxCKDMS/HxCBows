@@ -34,6 +34,7 @@ public class EntityHxCArrow extends EntityArrow {
     public int inData;
     public boolean inGround;
     public int knockbackStrength;
+    public float speed;
     
     /** For loading **/
     public EntityHxCArrow(World worldObj) {
@@ -49,6 +50,7 @@ public class EntityHxCArrow extends EntityArrow {
     public EntityHxCArrow(World worldObj, EntityLivingBase shooter, float speed, ItemStack stack) {
         super(worldObj, shooter, speed);
         this.arrowStack = stack;
+        this.speed = speed;
     }
     
     /** For mobs **/
@@ -84,8 +86,7 @@ public class EntityHxCArrow extends EntityArrow {
     
     @Override
     public void onCollideWithPlayer(EntityPlayer player) {
-        super.onCollideWithPlayer(player);
-        /*if (!this.worldObj.isRemote && this.inGround && this.arrowShake <= 0) {
+        if (!this.worldObj.isRemote && this.inGround && this.arrowShake <= 0) {
             boolean pickedUp = this.canBePickedUp == 1 || this.canBePickedUp == 2 && player.capabilities.isCreativeMode;
             if (this.canBePickedUp == 1 && !player.inventory.addItemStackToInventory(arrowStack)) pickedUp = false;
             
@@ -94,7 +95,7 @@ public class EntityHxCArrow extends EntityArrow {
                 player.onItemPickup(this, 1);
                 this.setDead();
             }
-        }*/
+        }
     }
     
     public void setKnockbackStrength(int knockback) {
@@ -122,11 +123,11 @@ public class EntityHxCArrow extends EntityArrow {
         
         Block inBlock = this.worldObj.getBlock(this.xTile, this.yTile, this.zTile);
         
-        if (inBlock.getMaterial() != Material.air) {
+        /*if (inBlock.getMaterial() != Material.air) {
             inBlock.setBlockBoundsBasedOnState(this.worldObj, this.xTile, this.yTile, this.zTile);
             AxisAlignedBB blockBB = inBlock.getCollisionBoundingBoxFromPool(this.worldObj, this.xTile, this.yTile, this.zTile);
             if (blockBB != null && blockBB.isVecInside(Vec3.createVectorHelper(this.posX, this.posY, this.posZ))) this.inGround = true;
-        }
+        }*/
         
         if (this.arrowShake > 0) --this.arrowShake;
         
@@ -267,12 +268,7 @@ public class EntityHxCArrow extends EntityArrow {
                 }
             }
             
-            // Crit particles
-            if (this.getIsCritical()) {
-                for (i = 0; i < 4; ++i) {
-                    this.worldObj.spawnParticle("crit", this.posX + this.motionX * (double) i / 4.0D, this.posY + this.motionY * (double) i / 4.0D, this.posZ + this.motionZ * (double) i / 4.0D, -this.motionX, -this.motionY + 0.2D, -this.motionZ);
-                }
-            }
+            this.onAirTick();
             
             this.posX += this.motionX;
             this.posY += this.motionY;
@@ -297,11 +293,6 @@ public class EntityHxCArrow extends EntityArrow {
             checkDist = 0.05F;
             
             if (this.isInWater()) {
-                for (int l = 0; l < 4; ++l) {
-                    motionXZ = 0.25F;
-                    this.worldObj.spawnParticle("bubble", this.posX - this.motionX * (double) motionXZ, this.posY - this.motionY * (double) motionXZ, this.posZ - this.motionZ * (double) motionXZ, this.motionX, this.motionY, this.motionZ);
-                }
-                
                 speedModifier = 0.8F;
             }
             
@@ -315,6 +306,21 @@ public class EntityHxCArrow extends EntityArrow {
             this.motionY -= (double) checkDist;
             this.setPosition(this.posX, this.posY, this.posZ);
             this.func_145775_I();
+        }
+    }
+    
+    protected void onAirTick() {
+        // Crit particles
+        if (this.getIsCritical()) {
+            for (int i = 0; i < 4; ++i) {
+                //this.worldObj.spawnParticle("crit", this.posX + this.motionX * (double) i / 4.0D, this.posY + this.motionY * (double) i / 4.0D, this.posZ + this.motionZ * (double) i / 4.0D, -this.motionX, -this.motionY + 0.2D, -this.motionZ);
+            }
+        }
+        
+        if (this.isInWater()) {
+            for (int i = 0; i < 4; ++i) {
+                //this.worldObj.spawnParticle("bubble", this.posX - this.motionX * 0.25D, this.posY - this.motionY * 0.25D, this.posZ - this.motionZ * 0.25D, this.motionX, this.motionY, this.motionZ);
+            }
         }
     }
 }
