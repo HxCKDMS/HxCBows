@@ -1,15 +1,17 @@
 package HxCKDMS.bows;
 
-import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.common.MinecraftForge;
+import HxCKDMS.bows.entity.EntityHxCArrow;
+import HxCKDMS.bows.entity.EntityHxCSRBArrow;
+import HxCKDMS.bows.gui.GuiHUD;
 import HxCKDMS.bows.item.Items;
 import HxCKDMS.bows.lib.BowHandler;
 import HxCKDMS.bows.lib.Reference;
 import HxCKDMS.bows.proxy.CommonProxy;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.client.registry.RenderingRegistry;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -17,6 +19,7 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.registry.EntityRegistry;
 
 //cpw.mods.fml.common.versioning.VersionRange.createFromVersionSpec
 @Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.VERSION, dependencies = Reference.DEPENDENCIES)
@@ -27,6 +30,8 @@ public class Bows {
     
     @Instance(Reference.MOD_ID)
     public static Bows instance;
+    
+    public static GuiHUD hud;
     
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -39,15 +44,17 @@ public class Bows {
         is.setTagCompound(tag);
         tag.setString("bow", "wood");
         tag.setString("bowstring", "normal");
-        CraftingManager.getInstance().addShapelessRecipe(is.copy(), new Object[] { Block.getBlockFromName("dirt") });
         tag.setString("bow", "iron");
-        CraftingManager.getInstance().addShapelessRecipe(is.copy(), new Object[] { Block.getBlockFromName("cobblestone") });
         
         // Ore dictionary
         //OreDictionary.registerOre("string", ore);
         
+        EntityRegistry.registerModEntity(EntityHxCArrow.class, "HxCArrow", 666, this, 64, 20, true);
+        EntityRegistry.registerModEntity(EntityHxCSRBArrow.class, "HxCSRBArrow", 667, this, 64, 20, true);
         
         proxy.preinit();
+        MinecraftForge.EVENT_BUS.register(Bows.hud = new GuiHUD(Minecraft.getMinecraft()));
+        FMLCommonHandler.instance().bus().register(Bows.hud);
     }
     
     @EventHandler

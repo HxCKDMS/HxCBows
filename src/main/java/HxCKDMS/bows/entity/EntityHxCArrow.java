@@ -1,5 +1,7 @@
 package HxCKDMS.bows.entity;
 
+import io.netty.buffer.ByteBuf;
+
 import java.util.List;
 
 import net.minecraft.block.Block;
@@ -20,12 +22,14 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import cpw.mods.fml.common.network.ByteBufUtils;
+import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class EntityHxCArrow extends EntityArrow {
+public class EntityHxCArrow extends EntityArrow implements IEntityAdditionalSpawnData {
     public ItemStack arrowStack;
-    private int ticksInAir;
+    public int ticksInAir;
     public int ticksInGround;
     public int xTile = -1;
     public int yTile = -1;
@@ -34,6 +38,8 @@ public class EntityHxCArrow extends EntityArrow {
     public int inData;
     public boolean inGround;
     public int knockbackStrength;
+    
+    /** Changing this value does nothing **/
     public float speed;
     
     /** For loading **/
@@ -74,6 +80,7 @@ public class EntityHxCArrow extends EntityArrow {
     
     @Override
     public void readEntityFromNBT(NBTTagCompound tag) {
+        super.readEntityFromNBT(tag);
         // Thanks, Obama
         this.xTile = tag.getShort("xTile");
         this.yTile = tag.getShort("yTile");
@@ -82,6 +89,20 @@ public class EntityHxCArrow extends EntityArrow {
         this.inTile = Block.getBlockById(tag.getByte("inTile") & 255);
         this.inData = tag.getByte("inData") & 255;
         this.inGround = tag.getByte("inGround") == 1;
+        this.arrowStack = ItemStack.loadItemStackFromNBT(tag.getCompoundTag("arrowStack"));
+    }
+    
+    @Override
+    public void writeEntityToNBT(NBTTagCompound tag) {
+        super.writeEntityToNBT(tag);
+        tag.setShort("xTile", (short) this.xTile);
+        tag.setShort("yTile", (short) this.yTile);
+        tag.setShort("zTile", (short) this.zTile);
+        tag.setShort("life", (short) this.ticksInGround);
+        tag.setByte("inTile", (byte) Block.getIdFromBlock(this.inTile));
+        tag.setByte("inData", (byte) this.inData);
+        tag.setByte("inGround", (byte) (this.inGround ? 1 : 0));
+        if (arrowStack != null) tag.setTag("arrowStack", arrowStack.writeToNBT(new NBTTagCompound()));
     }
     
     @Override
@@ -113,6 +134,9 @@ public class EntityHxCArrow extends EntityArrow {
     
     @Override
     public void onUpdate() {
+        // No-clip is a thing now (pass through blocks and hit only entities)
+        //this.noClip = true;
+        
         this.onEntityUpdate();
         
         if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F) {
@@ -123,11 +147,11 @@ public class EntityHxCArrow extends EntityArrow {
         
         Block inBlock = this.worldObj.getBlock(this.xTile, this.yTile, this.zTile);
         
-        /*if (inBlock.getMaterial() != Material.air) {
+        if (!this.noClip && inBlock.getMaterial() != Material.air) {
             inBlock.setBlockBoundsBasedOnState(this.worldObj, this.xTile, this.yTile, this.zTile);
             AxisAlignedBB blockBB = inBlock.getCollisionBoundingBoxFromPool(this.worldObj, this.xTile, this.yTile, this.zTile);
             if (blockBB != null && blockBB.isVecInside(Vec3.createVectorHelper(this.posX, this.posY, this.posZ))) this.inGround = true;
-        }*/
+        }
         
         if (this.arrowShake > 0) --this.arrowShake;
         
@@ -153,11 +177,14 @@ public class EntityHxCArrow extends EntityArrow {
             ++this.ticksInAir;
             Vec3 posVec = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
             Vec3 nextPosVec = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-            MovingObjectPosition moveChecker = this.worldObj.func_147447_a(posVec, nextPosVec, false, true, false);
-            posVec = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
-            nextPosVec = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+            MovingObjectPosition moveChecker = null;
             
-            if (moveChecker != null) nextPosVec = Vec3.createVectorHelper(moveChecker.hitVec.xCoord, moveChecker.hitVec.yCoord, moveChecker.hitVec.zCoord);
+            if (!this.noClip) {
+                moveChecker = this.worldObj.func_147447_a(posVec, nextPosVec, false, true, false);
+                posVec = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
+                nextPosVec = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+                if (moveChecker != null) nextPosVec = Vec3.createVectorHelper(moveChecker.hitVec.xCoord, moveChecker.hitVec.yCoord, moveChecker.hitVec.zCoord);
+            }
             
             Entity collEnt = null;
             List nearbyEnts = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
@@ -169,16 +196,18 @@ public class EntityHxCArrow extends EntityArrow {
                 Entity curEnt = (Entity) nearbyEnts.get(i);
                 
                 if (curEnt.canBeCollidedWith() && (curEnt != this.shootingEntity || this.ticksInAir >= 5)) {
-                    checkDist = 0.3F;
-                    AxisAlignedBB checkBB = curEnt.boundingBox.expand((double) checkDist, (double) checkDist, (double) checkDist);
-                    MovingObjectPosition intersection = checkBB.calculateIntercept(posVec, nextPosVec);
-                    
-                    if (intersection != null) {
-                        double intersectDist = posVec.distanceTo(intersection.hitVec);
+                    if (!(curEnt instanceof EntityPlayer && (((EntityPlayer) curEnt).capabilities.disableDamage || (this.shootingEntity instanceof EntityPlayer && !((EntityPlayer) this.shootingEntity).canAttackPlayer((EntityPlayer) curEnt))))) {
+                        checkDist = 0.3F;
+                        AxisAlignedBB checkBB = curEnt.boundingBox.expand((double) checkDist, (double) checkDist, (double) checkDist);
+                        MovingObjectPosition intersection = checkBB.calculateIntercept(posVec, nextPosVec);
                         
-                        if (intersectDist < collDistance || collDistance == 0.0D) {
-                            collEnt = curEnt;
-                            collDistance = intersectDist;
+                        if (intersection != null) {
+                            double intersectDist = posVec.distanceTo(intersection.hitVec);
+                            
+                            if (intersectDist < collDistance || collDistance == 0.0D) {
+                                collEnt = curEnt;
+                                collDistance = intersectDist;
+                            }
                         }
                     }
                 }
@@ -186,14 +215,7 @@ public class EntityHxCArrow extends EntityArrow {
             
             if (collEnt != null) {
                 moveChecker = new MovingObjectPosition(collEnt);
-            }
-            
-            if (moveChecker != null && moveChecker.entityHit != null && moveChecker.entityHit instanceof EntityPlayer) {
-                EntityPlayer collPlayer = (EntityPlayer) moveChecker.entityHit;
-                
-                if (collPlayer.capabilities.disableDamage || this.shootingEntity instanceof EntityPlayer && !((EntityPlayer) this.shootingEntity).canAttackPlayer(collPlayer)) {
-                    moveChecker = null;
-                }
+                this.setDead();
             }
             
             float motionXYZ;
@@ -290,7 +312,7 @@ public class EntityHxCArrow extends EntityArrow {
             this.rotationPitch = this.prevRotationPitch + (this.rotationPitch - this.prevRotationPitch) * 0.2F;
             this.rotationYaw = this.prevRotationYaw + (this.rotationYaw - this.prevRotationYaw) * 0.2F;
             float speedModifier = 0.99F;
-            checkDist = 0.05F;
+            checkDist = this.getGravity();
             
             if (this.isInWater()) {
                 speedModifier = 0.8F;
@@ -313,14 +335,34 @@ public class EntityHxCArrow extends EntityArrow {
         // Crit particles
         if (this.getIsCritical()) {
             for (int i = 0; i < 4; ++i) {
-                //this.worldObj.spawnParticle("crit", this.posX + this.motionX * (double) i / 4.0D, this.posY + this.motionY * (double) i / 4.0D, this.posZ + this.motionZ * (double) i / 4.0D, -this.motionX, -this.motionY + 0.2D, -this.motionZ);
+                this.worldObj.spawnParticle("crit", this.posX + this.motionX * (double) i / 4.0D, this.posY + this.motionY * (double) i / 4.0D, this.posZ + this.motionZ * (double) i / 4.0D, -this.motionX, -this.motionY + 0.2D, -this.motionZ);
             }
         }
         
         if (this.isInWater()) {
             for (int i = 0; i < 4; ++i) {
-                //this.worldObj.spawnParticle("bubble", this.posX - this.motionX * 0.25D, this.posY - this.motionY * 0.25D, this.posZ - this.motionZ * 0.25D, this.motionX, this.motionY, this.motionZ);
+                this.worldObj.spawnParticle("bubble", this.posX - this.motionX * 0.25D, this.posY - this.motionY * 0.25D, this.posZ - this.motionZ * 0.25D, this.motionX, this.motionY, this.motionZ);
             }
         }
+    }
+    
+    @Override
+    public void writeSpawnData(ByteBuf buffer) {
+        ByteBufUtils.writeItemStack(buffer, this.arrowStack);
+        if (this.shootingEntity instanceof EntityPlayer) ByteBufUtils.writeUTF8String(buffer, ((EntityPlayer) this.shootingEntity).getCommandSenderName());
+    }
+    
+    @Override
+    public void readSpawnData(ByteBuf buffer) {
+        try {
+            this.arrowStack = ByteBufUtils.readItemStack(buffer);
+            this.shootingEntity = this.worldObj.getPlayerEntityByName(ByteBufUtils.readUTF8String(buffer));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    public float getGravity() {
+        return 0.05F;
     }
 }
