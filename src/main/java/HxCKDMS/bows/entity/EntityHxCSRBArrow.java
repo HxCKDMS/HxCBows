@@ -50,47 +50,42 @@ public class EntityHxCSRBArrow extends EntityHxCArrow {
     public void onUpdate() {
         //if (true) return;
         
-        if (this.getIsCritical()) {
-            this.shouldAsplode = true;
-        }
+        if (this.getIsCritical()) this.shouldAsplode = true;
         
         super.onUpdate();
-        if (shouldAsplode && !hasAsploded && this.ticksInAir >= 10) {
-            hasAsploded = true;
+        if (this.shouldAsplode && !this.hasAsploded && this.ticksInAir >= 10) {
+            this.hasAsploded = true;
             this.motionX *= 16D;
             this.motionY *= 16D;
             this.motionZ *= 16D;
             // Do asplosion
             
-            if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) {
-                if (false) {
-                    for (int n = 0; n < 360; n++) {
-                        double speed = 0.5D;
-                        float[] color = getColor((float) n);
-                        EntityReddustFX particle = new EntityReddustFX(this.worldObj, this.posX, this.posY, this.posZ, color[0], color[1], color[2]);
-                        particle.motionX = (this.rand.nextDouble() - 0.5D) * speed;
-                        particle.motionY = (this.rand.nextDouble() - 0.5D) * speed;
-                        particle.motionZ = (this.rand.nextDouble() - 0.5D) * speed;
-                        Minecraft.getMinecraft().effectRenderer.addEffect(particle);
-                        particle.renderDistanceWeight = 5.0D;
-                    }
-                } else {
-                    Vec3 arrowDir = Vec3.createVectorHelper(this.motionX, this.motionY, this.motionZ);
-                    arrowDir = arrowDir.normalize();
-                    
-                    double speed = 0.5D;
-                    for (float i = 0; i < 360; i++) {
-                        double theta = Math.toRadians(i);
-                        Vec3 normal = Vec3.createVectorHelper(Math.cos(theta), 0D, Math.sin(theta));
-                        Vec3 result = arrowDir.crossProduct(normal).normalize();
-                        float[] color = getColor((float) i);
-                        EntityReddustFX particle = new EntityReddustFX(this.worldObj, this.posX, this.posY, this.posZ, color[0], color[1], color[2]);
-                        particle.motionX = result.xCoord * speed;
-                        particle.motionY = result.yCoord * speed;
-                        particle.motionZ = result.zCoord * speed;
-                        Minecraft.getMinecraft().effectRenderer.addEffect(particle);
-                        particle.renderDistanceWeight = 5.0D;
-                    }
+            if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) if (false) for (int n = 0; n < 360; n++) {
+                double speed = 0.5D;
+                float[] color = this.getColor(n);
+                EntityReddustFX particle = new EntityReddustFX(this.worldObj, this.posX, this.posY, this.posZ, color[0], color[1], color[2]);
+                particle.motionX = (this.rand.nextDouble() - 0.5D) * speed;
+                particle.motionY = (this.rand.nextDouble() - 0.5D) * speed;
+                particle.motionZ = (this.rand.nextDouble() - 0.5D) * speed;
+                Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+                particle.renderDistanceWeight = 5.0D;
+            }
+            else {
+                Vec3 arrowDir = Vec3.createVectorHelper(this.motionX, this.motionY, this.motionZ);
+                arrowDir = arrowDir.normalize();
+                
+                double speed = 0.5D;
+                for (float i = 0; i < 360; i++) {
+                    double theta = Math.toRadians(i);
+                    Vec3 normal = Vec3.createVectorHelper(Math.cos(theta), 0D, Math.sin(theta));
+                    Vec3 result = arrowDir.crossProduct(normal).normalize();
+                    float[] color = this.getColor(i);
+                    EntityReddustFX particle = new EntityReddustFX(this.worldObj, this.posX, this.posY, this.posZ, color[0], color[1], color[2]);
+                    particle.motionX = result.xCoord * speed;
+                    particle.motionY = result.yCoord * speed;
+                    particle.motionZ = result.zCoord * speed;
+                    Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+                    particle.renderDistanceWeight = 5.0D;
                 }
             }
             
@@ -101,13 +96,11 @@ public class EntityHxCSRBArrow extends EntityHxCArrow {
     @Override
     protected void onAirTick() {
         super.onAirTick();
-        if (this.hasAsploded && FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) {
-            for (int i = 0; i < 4; ++i) {
-                float[] color = getColor(this.ticksInAir - 10);
-                EntityReddustFX particle = new EntityReddustFX(this.worldObj, this.posX + this.motionX * (double) i / 4.0D, this.posY + this.motionY * (double) i / 4.0D, this.posZ + this.motionZ * (double) i / 4.0D, color[0], color[1], color[2]);
-                Minecraft.getMinecraft().effectRenderer.addEffect(particle);
-                particle.renderDistanceWeight = 5.0D;
-            }
+        if (this.hasAsploded && FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) for (int i = 0; i < 4; ++i) {
+            float[] color = this.getColor(this.ticksInAir - 10);
+            EntityReddustFX particle = new EntityReddustFX(this.worldObj, this.posX + this.motionX * i / 4.0D, this.posY + this.motionY * i / 4.0D, this.posZ + this.motionZ * i / 4.0D, color[0], color[1], color[2]);
+            Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+            particle.renderDistanceWeight = 5.0D;
         }
         if (this.ticksInAir >= 100) this.setDead();
     }
@@ -117,7 +110,7 @@ public class EntityHxCSRBArrow extends EntityHxCArrow {
         float red = (float) Math.sin(theta) + 0.5F;
         float green = (float) Math.sin(theta + 1.05F) + 0.5F;
         float blue = (float) Math.sin(theta + 2.09F) + 0.5F;
-        return new float[] { (red == 0F) ? 0.01F : red, green, blue };
+        return new float[] { red == 0F ? 0.01F : red, green, blue };
     }
     
     @Override

@@ -24,9 +24,9 @@ import HxCKDMS.bows.parts.IBowPart;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class ItemSpecialBow extends ItemBow {
+public class ItemHxCBow extends ItemBow {
     
-    public ItemSpecialBow() {
+    public ItemHxCBow() {
         super();
         this.setUnlocalizedName("HxCBow");
         this.setNoRepair();
@@ -54,13 +54,12 @@ public class ItemSpecialBow extends ItemBow {
         ItemStack is = new ItemStack(item);
         NBTTagCompound tag = new NBTTagCompound();
         is.setTagCompound(tag);
-        for (String bow : BowHandler.bows.keySet()) {
+        for (String bow : BowHandler.bows.keySet())
             for (String bowstring : BowHandler.bowstrings.keySet()) {
                 tag.setString("bow", bow);
                 tag.setString("bowstring", bowstring);
                 l.add(is.copy());
             }
-        }
     }
     
     @Override

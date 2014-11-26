@@ -1,11 +1,11 @@
 package HxCKDMS.bows.parts;
 
-import HxCKDMS.bows.entity.EntityHxCArrow;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
+import HxCKDMS.bows.entity.EntityHxCArrow;
 
 public class Bow implements IBowPart {
     public String name;
@@ -19,19 +19,20 @@ public class Bow implements IBowPart {
         this.drawTime = 18;
     }
     
+    @Override
     public void registerIcons(IIconRegister iconRegister) {
         this.icons = new IIcon[4];
-        this.icons[0] = iconRegister.registerIcon("hxcbows:bows/standby/" + name);
-        this.icons[1] = iconRegister.registerIcon("hxcbows:bows/0/" + name);
-        this.icons[2] = iconRegister.registerIcon("hxcbows:bows/1/" + name);
-        this.icons[3] = iconRegister.registerIcon("hxcbows:bows/2/" + name);
+        this.icons[0] = iconRegister.registerIcon("hxcbows:bows/standby/" + this.name);
+        this.icons[1] = iconRegister.registerIcon("hxcbows:bows/0/" + this.name);
+        this.icons[2] = iconRegister.registerIcon("hxcbows:bows/1/" + this.name);
+        this.icons[3] = iconRegister.registerIcon("hxcbows:bows/2/" + this.name);
     }
-
+    
     @Override
     public IIcon[] getPartIcons() {
         return this.icons;
     }
-
+    
     @Override
     public IIcon getItemIcon() {
         return this.icons[0];
@@ -45,12 +46,12 @@ public class Bow implements IBowPart {
     public int getDrawTime() {
         return this.drawTime;
     }
-
+    
     @Override
     public EntityHxCArrow applyArrowEffects(ItemStack stack, EntityHxCArrow arrow, float pullPerc) {
         if (pullPerc == 1.0F) arrow.setIsCritical(true);
         int powerModifier = EnchantmentHelper.getEnchantmentLevel(Enchantment.power.effectId, stack);
-        if (powerModifier > 0) arrow.setDamage(arrow.getDamage() + (double) powerModifier * 0.5D + 0.5D);
+        if (powerModifier > 0) arrow.setDamage(arrow.getDamage() + powerModifier * 0.5D + 0.5D);
         int punchModifier = EnchantmentHelper.getEnchantmentLevel(Enchantment.punch.effectId, stack);
         if (punchModifier > 0) arrow.setKnockbackStrength(punchModifier);
         if (EnchantmentHelper.getEnchantmentLevel(Enchantment.flame.effectId, stack) > 0) arrow.setFire(100);

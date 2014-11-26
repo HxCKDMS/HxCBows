@@ -5,7 +5,6 @@ import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import HxCKDMS.bows.lib.Reference;
@@ -33,6 +32,7 @@ public class EntityTargetFX extends EntityFX {
         this.particleScale = 1F;
     }
     
+    @Override
     public void renderParticle(Tessellator tessellator, float tickTime, float rotX, float rotXZ, float rotZ, float rotYZ, float rotXY) {
         //GL11.glDisable(GL11.GL_LIGHTING);
         
@@ -42,14 +42,14 @@ public class EntityTargetFX extends EntityFX {
         float maxV = minV + 0.0625F;
         float size = 0.05F * this.particleScale;
         
-        float x = (float) (this.prevPosX + (this.posX - this.prevPosX) * (double) tickTime - interpPosX);
-        float y = (float) (this.prevPosY + (this.posY - this.prevPosY) * (double) tickTime - interpPosY);
-        float z = (float) (this.prevPosZ + (this.posZ - this.prevPosZ) * (double) tickTime - interpPosZ);
+        float x = (float) (this.prevPosX + (this.posX - this.prevPosX) * tickTime - EntityFX.interpPosX);
+        float y = (float) (this.prevPosY + (this.posY - this.prevPosY) * tickTime - EntityFX.interpPosY);
+        float z = (float) (this.prevPosZ + (this.posZ - this.prevPosZ) * tickTime - EntityFX.interpPosZ);
         tessellator.setColorRGBA_F(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha);
-        tessellator.addVertexWithUV((double) (x - rotX * size - rotYZ * size), (double) (y - rotXZ * size), (double) (z - rotZ * size - rotXY * size), (double) maxU, (double) maxV);//:v
-        tessellator.addVertexWithUV((double) (x - rotX * size + rotYZ * size), (double) (y + rotXZ * size), (double) (z - rotZ * size + rotXY * size), (double) maxU, (double) minV);//:^
-        tessellator.addVertexWithUV((double) (x + rotX * size + rotYZ * size), (double) (y + rotXZ * size), (double) (z + rotZ * size + rotXY * size), (double) minU, (double) minV);//^:
-        tessellator.addVertexWithUV((double) (x + rotX * size - rotYZ * size), (double) (y - rotXZ * size), (double) (z + rotZ * size - rotXY * size), (double) minU, (double) maxV);//v:
+        tessellator.addVertexWithUV(x - rotX * size - rotYZ * size, y - rotXZ * size, z - rotZ * size - rotXY * size, maxU, maxV);//:v
+        tessellator.addVertexWithUV(x - rotX * size + rotYZ * size, y + rotXZ * size, z - rotZ * size + rotXY * size, maxU, minV);//:^
+        tessellator.addVertexWithUV(x + rotX * size + rotYZ * size, y + rotXZ * size, z + rotZ * size + rotXY * size, minU, minV);//^:
+        tessellator.addVertexWithUV(x + rotX * size - rotYZ * size, y - rotXZ * size, z + rotZ * size - rotXY * size, minU, maxV);//v:
         Minecraft.getMinecraft().renderEngine.bindTexture(EntityTargetFX.texture);
         tessellator.draw();
         Minecraft.getMinecraft().renderEngine.bindTexture(Reference.particleTextures);
@@ -67,22 +67,23 @@ public class EntityTargetFX extends EntityFX {
         this.prevPosY = this.posY;
         this.prevPosZ = this.posZ;
         
-        if (player == null || target == null || player.isDead || target.isDead) {
+        if (this.player == null || this.target == null || this.player.isDead || this.target.isDead) {
             this.setDead();
             return;
         }
         
         //super.onUpdate();
         //playerLoc.xCoord + dirToTarget.xCoord * dist, playerLoc.yCoord + dirToTarget.yCoord * dist, playerLoc.zCoord + dirToTarget.zCoord * dist,
-        Vec3 playerLoc = player.getPosition(1F);
-        Vec3 targetLoc = Vec3.createVectorHelper(target.posX, target.posY - target.height * 0.25F, target.posZ);
-        targetLoc.yCoord += target.getEyeHeight();
+        Vec3 playerLoc = this.player.getPosition(1F);
+        Vec3 targetLoc = Vec3.createVectorHelper(this.target.posX, this.target.posY - this.target.height * 0.25F, this.target.posZ);
+        targetLoc.yCoord += this.target.getEyeHeight();
         Vec3 dirToTarget = playerLoc.subtract(targetLoc).normalize();
         
-        float dist = (float) player.getDistanceSqToEntity(target);
+        float dist = (float) this.player.getDistanceSqToEntity(this.target);
         if (dist < 64F) {
             this.setDead();
-            for (int _ = 0; _ < 10; _++) worldObj.spawnParticle("smoke", posX, posY, posZ, 0D, 0D, 0D);
+            for (int _ = 0; _ < 10; _++)
+                this.worldObj.spawnParticle("smoke", this.posX, this.posY, this.posZ, 0D, 0D, 0D);
             return;
         }
         dist = 4F;

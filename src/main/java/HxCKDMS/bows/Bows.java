@@ -52,18 +52,18 @@ public class Bows {
         EntityRegistry.registerModEntity(EntityHxCArrow.class, "HxCArrow", 666, this, 64, 20, true);
         EntityRegistry.registerModEntity(EntityHxCSRBArrow.class, "HxCSRBArrow", 667, this, 64, 20, true);
         
-        proxy.preinit();
+        Bows.proxy.preinit();
         MinecraftForge.EVENT_BUS.register(Bows.hud = new GuiHUD(Minecraft.getMinecraft()));
         FMLCommonHandler.instance().bus().register(Bows.hud);
     }
     
     @EventHandler
     public void init(FMLInitializationEvent event) {
-        proxy.init();
+        Bows.proxy.init();
     }
     
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
-        proxy.postinit();
+        Bows.proxy.postinit();
     }
 }

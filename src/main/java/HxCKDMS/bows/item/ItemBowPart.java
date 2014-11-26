@@ -53,6 +53,7 @@ public class ItemBowPart extends Item {
         return BowHandler.blank;
     }
     
+    @Override
     @SideOnly(Side.CLIENT)
     public IIcon getIconIndex(ItemStack stack) {
         return this.getIcon(stack, 0);
